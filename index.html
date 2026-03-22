@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>프리미엄 수제 도장 시뮬레이터 PRO</title>
+    <title>프리미엄 수제 도장 시뮬레이터</title>
     <style>
         /* [폰트 설정] */
         @font-face { font-family: 'B1'; src: url('body1.woff'); }
@@ -25,39 +25,36 @@
         :root { --point-pink: #e91e63; --soft-bg: #fdfafb; }
         body { font-family: 'Apple SD Gothic Neo', sans-serif; background: var(--soft-bg); margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
         
-        .store-banner { background: #fff1f6; padding: 10px; border-radius: 12px; margin-bottom: 15px; width: 100%; max-width: 900px; border: 1px solid #ffdae9; text-align: center; box-sizing: border-box; }
-        .store-banner a { color: var(--point-pink); text-decoration: none; font-weight: bold; font-size: 13px; }
+        /* 상단 스마트스토어 링크 */
+        .store-banner { background: #fff1f6; padding: 12px; border-radius: 12px; margin-bottom: 15px; width: 100%; max-width: 900px; border: 1px solid #ffdae9; text-align: center; box-sizing: border-box; }
+        .store-banner a { color: var(--point-pink); text-decoration: none; font-weight: bold; font-size: 14px; }
 
         .box { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); width: 100%; max-width: 900px; box-sizing: border-box; }
         
-        /* [모바일/PC 공통: 무조건 가로 3열 레이아웃] */
-        .controls { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; background: #fafafa; padding: 12px; border-radius: 15px; border: 1px solid #eee; }
+        /* [핵심] 모바일/PC 모두 가로 3열 레이아웃 고정 */
+        .controls { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; background: #fafafa; padding: 15px; border-radius: 15px; border: 1px solid #eee; }
         .control-row { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 8px !important; align-items: end; }
         
         @media (min-width: 768px) { 
             body { padding: 20px; }
             .box { padding: 35px; }
             .control-row { gap: 20px !important; }
-            .store-banner a { font-size: 16px; }
         }
 
-        label { font-size: 9px; color: #888; margin-bottom: 5px; display: block; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        input, select { padding: 10px 8px; border: 1.5px solid #eee; border-radius: 8px; width: 100%; box-sizing: border-box; font-size: 12px; outline: none; background: #fff; appearance: none; -webkit-appearance: none; }
+        label { font-size: 10px; color: #888; margin-bottom: 6px; display: block; font-weight: bold; white-space: nowrap; }
+        input, select { padding: 12px 8px; border: 1.5px solid #eee; border-radius: 10px; width: 100%; box-sizing: border-box; font-size: 13px; outline: none; background: #fff; appearance: none; -webkit-appearance: none; }
         
-        /* 모바일에서 글자가 너무 크면 깨질 수 있어 PC는 조금 더 크게 */
-        @media (min-width: 768px) {
-            label { font-size: 12px; }
-            input, select { padding: 14px; font-size: 14px; }
-        }
-
         .canvas-wrapper { position: relative; line-height: 0; border: 5px solid #fff; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); overflow: hidden; background: #eee; width: 100%; }
         canvas { width: 100% !important; height: auto !important; display: block; }
         
+        /* 미리보기 비디오 위치 설정 */
         #videoContainer { position: absolute; overflow: hidden; background: #000; z-index: 10; pointer-events: none; border: 2px solid #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
         .video-player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
 
+        /* 하단 다운로드 버튼 */
         .action-area { margin-top: 20px; text-align: center; }
-        .download-btn { background: var(--point-pink); color: #fff; border: none; padding: 18px; border-radius: 12px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; max-width: 400px; }
+        .download-btn { background: #333; color: #fff; border: none; padding: 18px; border-radius: 12px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; max-width: 400px; transition: 0.3s; }
+        .download-btn:active { background: #000; transform: scale(0.98); }
     </style>
 </head>
 <body>
@@ -71,14 +68,14 @@
         <div class="control-row">
             <div><label>도장 인면 이름</label><input type="text" id="printNameInput" value="강호석" oninput="draw()"></div>
             <div><label>도장 몸통 새김글</label><input type="text" id="bodyTextInput" value="STAMP" oninput="draw()"></div>
-            <div><label>💎 몸체 폰트</label><select id="bodyFontSelect" onchange="draw()"></select></div>
+            <div><label>💎 몸체 각인 폰트</label><select id="bodyFontSelect" onchange="draw()"></select></div>
         </div>
         <div class="control-row">
             <div><label>돌 종류 선택</label><select id="stoneSelect" onchange="changeStone()">
                 <option value="stone1">청전석</option><option value="stone2">요녕석</option><option value="stone3">백두석</option><option value="stone4">밀크로즈석</option>
             </select></div>
-            <div><label>각인 위치</label><select id="posSelect" onchange="draw()">
-                <option value="P1">우측 하단</option><option value="P2">중앙 하단</option><option value="P3" selected>우측 상단</option>
+            <div><label>몸체 각인 위치</label><select id="posSelect" onchange="draw()">
+                <option value="P1">우측 하단 (전통)</option><option value="P2">중앙 하단 (심플)</option><option value="P3" selected>우측 상단 (감성)</option>
             </select></div>
             <div><label>🔴 인영 폰트</label><select id="printFontSelect" onchange="draw()"></select></div>
         </div>
@@ -97,6 +94,7 @@
 </div>
 
 <script>
+    /* [매니저 설정 데이터] */
     const CONFIG = {
         print: {
             box_size: 160, radius: 20, border_width: 6, red_color: "#b03a2e", font_size: 60,
