@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>프리미엄 수제 도장 시뮬레이터 PRO - 정밀 제어형</title>
+    <title>프리미엄 수제 도장 시뮬레이터 PRO</title>
     <style>
         :root {
             --point-pink: #e91e63;
@@ -48,19 +48,19 @@
 <body>
 
 <div class="box">
-    <div class="store-link-banner" onclick="window.open('https://smartstore.naver.com/YOUR_LINK', '_blank')">
+    <div class="store-link-banner" onclick="window.open('스마트스토어주소', '_blank')">
         <b>🌸 우리 아이 첫 도장, 정성을 담은 커스텀 디자인 [스토어 구경하기] →</b>
     </div>
 
     <div class="controls">
         <div class="control-row">
             <div>
-                <label>성 / 몸체 영문 각인</label>
-                <input type="text" id="surInput" value="STAMP" oninput="draw()">
+                <label>도장 인면 이름 (예: 강호석)</label>
+                <input type="text" id="printNameInput" value="강호석" oninput="draw()">
             </div>
             <div>
-                <label>이름 (최대 2글자)</label>
-                <input type="text" id="givenInput" value="민지" maxlength="2" oninput="draw()">
+                <label>도장 몸통 새김글 (영문/한글)</label>
+                <input type="text" id="bodyTextInput" value="STAMP" oninput="draw()">
             </div>
             <div>
                 <label>💎 몸체 각인 폰트</label>
@@ -87,11 +87,11 @@
                 </select>
             </div>
             <div>
-                <label>🔴 인영(도장면) 폰트</label>
+                <label>🔴 인영(도장면) 폰트 (10종)</label>
                 <select id="printFontSelect" class="font-box" onchange="draw()"></select>
             </div>
         </div>
-        <button class="apply-btn" onclick="draw()">설정 즉시 반영</button>
+        <button class="apply-btn" onclick="draw()">디자인 즉시 반영</button>
     </div>
 
     <div class="canvas-wrapper">
@@ -102,13 +102,11 @@
         </div>
     </div>
 
-    <button class="download-btn" onclick="downloadImage()">✨ 디자인 이미지 저장하기 (.png)</button>
+    <button class="download-btn" onclick="downloadImage()">✨ 나만의 디자인 저장하기 (.png)</button>
 </div>
 
 <script>
-    /* =========================================
-       [폰트 리스트]
-       ========================================= */
+    /* 폰트 리스트 (파일명 유지) */
     const BODY_FONTS = {
         'B1': { file: 'body1.woff', name: '감성 명조' },
         'B2': { file: 'body2.woff', name: '모던 고딕' },
@@ -118,58 +116,43 @@
     };
 
     const PRINT_FONTS = {
-        'P01': { file: 'p1.woff', name: '전서체' }, 'P02': { file: 'p2.woff', name: '고인체' },
-        'P03': { file: 'p3.woff', name: '초서체' }, 'P04': { file: 'p4.woff', name: '예서체' },
-        'P05': { file: 'p5.woff', name: '단정한 한글' }, 'P06': { file: 'p6.woff', name: '귀여운 서체' },
-        'P07': { file: 'p7.woff', name: '굵은 도장체' }, 'P08': { file: 'p8.woff', name: '세련된 서체' },
-        'P09': { file: 'p9.woff', name: '클래식 한자' }, 'P10': { file: 'p10.woff', name: '모던 스탬프' }
+        'P01': { file: 'p1.woff', name: '전서체(전통)' },
+        'P02': { file: 'p2.woff', name: '고인체(기본)' },
+        'P03': { file: 'p3.woff', name: '초서체(예술)' },
+        'P04': { file: 'p4.woff', name: '예서체(단정)' },
+        'P05': { file: 'p5.woff', name: '단정한 한글' },
+        'P06': { file: 'p6.woff', name: '귀여운 서체' },
+        'P07': { file: 'p7.woff', name: '굵은 도장체' },
+        'P08': { file: 'p8.woff', name: '세련된 서체' },
+        'P09': { file: 'p9.woff', name: '클래식 한자' },
+        'P10': { file: 'p10.woff', name: '모던 스탬프' }
     };
 
     /* =========================================
-       [매니저 가이드] 정밀 디자인 조절 섹션
+       [디자인 정밀 조절]
        ========================================= */
     const PRINT_UI = {
-        box_size: 160,       // 도장 사각형 기본 크기
-        radius: 20,          // 도장 테두리 곡률
-        red_color: "#b03a2e",// 인영 색상
-
-        // 1. [양각 도장] 정밀 설정
-        relief: {
-            x: 200,          // 가로 위치
-            y: 680,          // 세로 위치
-            font_size: 60,   // 글자 크기
-            sur_x: -35,      // 성(왼쪽) 가로 위치 조절
-            sur_y: 0,        // 성(왼쪽) 세로 위치 조절
-            given_x: 35,     // 이름(오른쪽) 가로 위치 조절
-            given_y: 0,      // 이름(오른쪽) 기준 세로 위치
-            given_gap: 35    // 이름 두 글자 사이의 상하 간격
-        },
-
-        // 2. [음각 도장] 정밀 설정 (양각과 별개로 조절 가능)
-        intaglio: {
-            x: 200,          // 가로 위치
-            y: 890,          // 세로 위치
-            font_size: 60,   // 글자 크기
-            sur_x: -35,      // 성 가로 위치
-            sur_y: 0,        // 성 세로 위치
-            given_x: 35,     // 이름 가로 위치
-            given_y: 0,      // 이름 기준 세로 위치
-            given_gap: 35    // 이름 두 글자 사이의 상하 간격
-        }
+        box_size: 160, radius: 20, red_color: "#b03a2e",
+        relief: { x: 200, y: 680, font_size: 60, sur_x: -35, sur_y: 0, given_x: 35, given_y: 0, given_gap: 35 },
+        intaglio: { x: 200, y: 890, font_size: 60, sur_x: -35, sur_y: 0, given_x: 35, given_y: 0, given_gap: 35 }
     };
 
-    // 3. 각인 시스템 및 영상 설정 (기능 유지)
     const VIDEO_UI = { top: "35px", right: "35px", width: "230px", height: "160px", radius: "15px" };
+    
+    // [석재별 각인 좌표 설정 - 스톤4까지 완결]
     const STAMP_SETTINGS = {
         "stone1_P1": { len2: { x: 435, y: 740, size: 65, space: 15 }, len3: { x: 435, y: 690, size: 60, space: 12 } },
         "stone1_P2": { len2: { x: 384, y: 820, size: 65, space: 20 }, len3: { x: 384, y: 820, size: 50, space: 15 } },
         "stone1_P3": { x: 445, y: 170, size: 30, space: 5 },
+
         "stone2_P1": { len2: { x: 435, y: 740, size: 65, space: 15 }, len3: { x: 435, y: 690, size: 60, space: 12 } },
         "stone2_P2": { len2: { x: 384, y: 820, size: 65, space: 20 }, len3: { x: 384, y: 820, size: 50, space: 15 } },
         "stone2_P3": { x: 445, y: 170, size: 30, space: 5 },
+
         "stone3_P1": { len2: { x: 435, y: 740, size: 65, space: 15 }, len3: { x: 435, y: 690, size: 60, space: 12 } },
         "stone3_P2": { len2: { x: 384, y: 820, size: 65, space: 20 }, len3: { x: 384, y: 820, size: 50, space: 15 } },
         "stone3_P3": { x: 445, y: 170, size: 30, space: 5 },
+
         "stone4_P1": { len2: { x: 435, y: 740, size: 65, space: 15 }, len3: { x: 435, y: 690, size: 60, space: 12 } },
         "stone4_P2": { len2: { x: 384, y: 820, size: 65, space: 20 }, len3: { x: 384, y: 820, size: 50, space: 15 } },
         "stone4_P3": { x: 445, y: 170, size: 30, space: 5 }
@@ -178,7 +161,6 @@
     const STONE_FILES = { "stone1": "stone1.jpg", "stone2": "stone2.jpg", "stone3": "stone3.jpg", "stone4": "stone4.jpg" };
     const VIDEO_MAP = { "stone1": "stone1_process.mp4", "stone2": "stone2_process.mp4", "stone3": "stone3_process.mp4", "stone4": "stone4_process.mp4" };
 
-    /* --- 엔진 구동 로직 --- */
     const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d');
     const stoneImg = new Image();
     const v1 = document.getElementById('v1'), v2 = document.getElementById('v2');
@@ -200,7 +182,8 @@
         if (curV.getAttribute('src') !== vPath) {
             nxtV.src = vPath; nxtV.load();
             nxtV.oncanplaythrough = () => {
-                nxtV.style.opacity = 1; curV.style.opacity = 0; nxtV.play();
+                nxtV.style.opacity = 1; curV.style.opacity = 0;
+                nxtV.play().catch(e => console.log("자동재생 활성화"));
                 [curV, nxtV] = [nxtV, curV]; nxtV.oncanplaythrough = null;
             };
         }
@@ -211,23 +194,25 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         if (stoneImg.complete) ctx.drawImage(stoneImg, 0, 0, canvas.width, canvas.height);
 
-        const sur = document.getElementById('surInput').value;
-        const given = document.getElementById('givenInput').value;
+        const printFullName = document.getElementById('printNameInput').value; 
+        const bodyText = document.getElementById('bodyTextInput').value;       
         const bFont = document.getElementById('bodyFontSelect').value;
         const pFont = document.getElementById('printFontSelect').value;
         const stone = document.getElementById('stoneSelect').value;
         const pos = document.getElementById('posSelect').value;
 
-        // 1. 몸체 각인
-        drawBodyStamp(sur, bFont, stone, pos);
+        // 1. 도장 몸통 각인
+        drawBodyStamp(bodyText, bFont, stone, pos);
 
-        // 2. 인영 렌더링 (양각/음각 개별 조절 데이터 적용)
+        // 2. 인영 렌더링 (첫글자는 성, 나머지는 이름으로 분리)
+        const sur = printFullName.charAt(0);
+        const given = printFullName.substring(1);
         renderAdvancedPrint(PRINT_UI.relief, sur, given, pFont, false);
         renderAdvancedPrint(PRINT_UI.intaglio, sur, given, pFont, true);
     }
 
     function drawBodyStamp(text, fontKey, stoneKey, posKey) {
-        const cfg = STAMP_SETTINGS[`${stoneKey}_${posKey}`];
+        let cfg = STAMP_SETTINGS[`${stoneKey}_${posKey}`];
         ctx.save();
         ctx.fillStyle = "rgba(255, 255, 255, 0.85)"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
         
@@ -242,23 +227,16 @@
         } else {
             const activeCfg = text.length <= 2 ? cfg.len2 : cfg.len3;
             ctx.font = `600 ${activeCfg.size}px ${fontKey}, sans-serif`;
-            if (posKey === 'P2') {
-                let x = activeCfg.x - (((text.length - 1) * (activeCfg.size + activeCfg.space)) / 2);
-                text.split('').forEach(char => { ctx.fillText(char, x, activeCfg.y); x += activeCfg.size + activeCfg.space; });
-            } else {
-                let y = activeCfg.y;
-                text.split('').forEach(char => { ctx.fillText(activeCfg.x, y); y += activeCfg.size + activeCfg.space; });
-            }
+            let y = activeCfg.y;
+            text.split('').forEach(char => { ctx.fillText(char, activeCfg.x, y); y += activeCfg.size + activeCfg.space; });
         }
         ctx.restore();
     }
 
-    // [개별 조절용 렌더링 함수]
     function renderAdvancedPrint(config, sur, given, fontKey, isNeg) {
         const ui = PRINT_UI;
         const drawX = config.x - (ui.box_size / 2);
         const drawY = config.y - (ui.box_size / 2);
-
         ctx.save();
         if (isNeg) {
             ctx.fillStyle = ui.red_color; fillRRect(drawX, drawY, ui.box_size, ui.box_size, ui.radius); ctx.fill();
@@ -270,10 +248,10 @@
         ctx.textAlign = "center"; ctx.textBaseline = "middle";
         ctx.font = `${config.font_size}px ${fontKey}`;
 
-        // 성(Surname) 위치 조절
-        ctx.fillText(sur[0] || "", config.x + config.sur_x, config.y + config.sur_y);
+        // 성 - 왼쪽 배치
+        ctx.fillText(sur || "", config.x + config.sur_x, config.y + config.sur_y);
 
-        // 이름(Given Name) 위치 및 간격 조절
+        // 이름 - 오른쪽 세로 배치
         if(given.length > 1) {
             ctx.fillText(given[0], config.x + config.given_x, config.y + config.given_y - config.given_gap);
             ctx.fillText(given[1], config.x + config.given_x, config.y + config.given_y + config.given_gap);
@@ -288,7 +266,7 @@
     }
 
     function downloadImage() {
-        const link = document.createElement('a'); link.download = 'custom-stamp-design.png';
+        const link = document.createElement('a'); link.download = 'premium-stamp-design.png';
         link.href = canvas.toDataURL(); link.click();
     }
 
