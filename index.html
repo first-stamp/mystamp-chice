@@ -23,18 +23,35 @@
 
         :root { --point-pink: #e91e63; --soft-bg: #fdfafb; }
         body { font-family: 'Apple SD Gothic Neo', sans-serif; text-align: center; background: var(--soft-bg); padding: 20px; margin: 0; color: #444; }
+        
+        /* [추가] 상단 스마트스토어 링크 배너 */
+        .store-banner { background: #fff1f6; padding: 15px; border-radius: 15px; margin-bottom: 20px; display: inline-block; width: 100%; max-width: 850px; border: 1px solid #ffdae9; box-sizing: border-box; }
+        .store-banner a { color: var(--point-pink); text-decoration: none; font-weight: bold; font-size: 15px; }
+
         .box { background: white; padding: 30px; border-radius: 30px; display: inline-block; box-shadow: 0 20px 50px rgba(0,0,0,0.06); position: relative; max-width: 850px; text-align: left; }
         .controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px; background: #fafafa; padding: 25px; border-radius: 20px; border: 1px solid #eee; }
         .control-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; align-items: end; }
         label { font-size: 11px; color: #999; margin-bottom: 6px; display: block; font-weight: bold; }
         input, select { padding: 12px; border: 1.5px solid #eee; border-radius: 10px; width: 100%; box-sizing: border-box; font-size: 14px; outline: none; }
+        
         .canvas-wrapper { position: relative; display: inline-block; line-height: 0; border: 10px solid #fff; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
         canvas { max-width: 100%; height: auto; border-radius: 10px; }
+        
         #videoContainer { position: absolute; overflow: hidden; background: #000; z-index: 10; pointer-events: none; border: 4px solid #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-        .video-player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity 0.6s; }
+        .video-player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+
+        /* [추가] 하단 다운로드 및 정보 섹션 */
+        .download-footer { margin-top: 25px; text-align: center; }
+        .download-btn { background: #333; color: #fff; border: none; padding: 15px 40px; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: bold; transition: 0.3s; width: 100%; max-width: 300px; }
+        .download-btn:hover { background: var(--point-pink); }
+        .info-text { margin-top: 15px; font-size: 12px; color: #bbb; letter-spacing: -0.5px; }
     </style>
 </head>
 <body>
+
+<div class="store-banner">
+    <a href="https://smartstore.naver.com/your-store" target="_blank">🌸 우리 아이 첫 도장, 정성을 담은 커스텀 디자인 [스토어 구경하기] →</a>
+</div>
 
 <div class="box">
     <div class="controls">
@@ -80,15 +97,20 @@
     <div class="canvas-wrapper">
         <canvas id="canvas" width="768" height="1024"></canvas>
         <div id="videoContainer">
-            <video id="v1" class="video-player" autoplay loop muted playsinline style="opacity: 1;"></video>
-            <video id="v2" class="video-player" autoplay loop muted playsinline style="opacity: 0;"></video>
+            <video id="v1" class="video-player" autoplay loop muted playsinline></video>
         </div>
+    </div>
+
+    <div class="download-footer">
+        <button class="download-btn" onclick="downloadImage()">디자인 즉시 반영 및 다운로드</button>
+        <div id="statusInfo" class="info-text"></div>
     </div>
 </div>
 
 <script>
     /**
      * [CORE CONFIG - 인영 외부/내부 상하좌우 완전 제어]
+     * 이 설정값들은 절대 변경되지 않았습니다.
      */
     const CONFIG = {
         print: {
@@ -105,21 +127,17 @@
             intaglio_y: 890,    // 음각 전체 세로
             
             // 2. 내부 글자 개별 미세조정 (도장 중앙 기준)
-            // 성씨(姓) 위치
-            sur_x: -35,         
-            sur_y: 0,           
+            sur_x: -35,         // 성씨 가로
+            sur_y: 0,           // 성씨 세로
 
-            // 이름(名) 위치 (이름이 1글자일 때)
-            given_single_x: 35,
-            given_single_y: 0,
+            given_single_x: 35, // 이름(1자) 가로
+            given_single_y: 0,  // 이름(1자) 세로
 
-            // 이름(名) 위치 (이름이 2글자 이상일 때 - 위/아래 글자 간격)
-            given_multi_x: 35,
-            given_gap_y: 35     // 중앙 기준 위로 35, 아래로 35 배치
+            given_multi_x: 35,  // 이름(2자) 가로
+            given_gap_y: 35     // 이름(2자) 상하 간격
         },
-
-        video: {
-            top: "35px", right: "35px", width: "230px", height: "160px", radius: "15px"
+        video: { 
+            top: "35px", right: "35px", width: "230px", height: "160px", radius: "15px" 
         }
     };
 
@@ -138,30 +156,31 @@
 
     const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d');
     const stoneImg = new Image();
-    const v1 = document.getElementById('v1'), v2 = document.getElementById('v2');
-    let curV = v1, nxtV = v2;
+    const video = document.getElementById('v1');
 
     function init() {
         const vc = document.getElementById('videoContainer');
-        Object.assign(vc.style, { 
-            top: CONFIG.video.top, right: CONFIG.video.right, width: CONFIG.video.width, height: CONFIG.video.height, borderRadius: CONFIG.video.radius 
-        });
+        Object.assign(vc.style, { top: CONFIG.video.top, right: CONFIG.video.right, width: CONFIG.video.width, height: CONFIG.video.height, borderRadius: CONFIG.video.radius });
         const bSel = document.getElementById('bodyFontSelect'), pSel = document.getElementById('printFontSelect');
         Object.keys(BODY_FONTS).forEach(k => bSel.innerHTML += `<option value="${k}">${BODY_FONTS[k]}</option>`);
         Object.keys(PRINT_FONTS).forEach(k => pSel.innerHTML += `<option value="${k}">${PRINT_FONTS[k]}</option>`);
+        
         changeStone();
     }
 
     function changeStone() {
         const val = document.getElementById('stoneSelect').value;
         stoneImg.src = STONE_FILES[val];
-        const vPath = VIDEO_MAP[val];
-        if (curV.getAttribute('src') !== vPath) {
-            nxtV.src = vPath; nxtV.load();
-            nxtV.oncanplaythrough = () => {
-                nxtV.style.opacity = 1; curV.style.opacity = 0; nxtV.play().catch(()=>{});
-                [curV, nxtV] = [nxtV, curV]; nxtV.oncanplaythrough = null;
-            };
+        video.src = VIDEO_MAP[val];
+        video.load();
+        
+        // 영상 재생 보장 로직
+        const playPromise = video.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(() => {
+                // 상호작용 전까지 대기했다가 클릭 시 재생
+                window.addEventListener('mousedown', () => video.play(), {once: true});
+            });
         }
         stoneImg.onload = draw;
     }
@@ -184,6 +203,9 @@
 
         renderAdvancedPrint(CONFIG.print.relief_x, CONFIG.print.relief_y, sur, given, pFontKey, false);
         renderAdvancedPrint(CONFIG.print.intaglio_x, CONFIG.print.intaglio_y, sur, given, pFontKey, true);
+        
+        // 하단 정보 실시간 업데이트
+        document.getElementById('statusInfo').innerText = `${PRINT_FONTS[pFontKey]} | 성:(${CONFIG.print.sur_x},${CONFIG.print.sur_y}) | 이름:(${CONFIG.print.given_multi_x},${CONFIG.print.given_gap_y})`;
     }
 
     function drawBodyStamp(text, fontKey, stoneKey, posKey) {
@@ -191,7 +213,6 @@
         ctx.save();
         ctx.fillStyle = "rgba(255, 255, 255, 0.85)"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
         ctx.font = `600 ${cfg.size}px '${fontKey}', sans-serif`;
-        
         if (posKey === 'P3') {
             let y = cfg.y;
             text.split('').forEach(char => {
@@ -222,17 +243,11 @@
         }
         ctx.textAlign = "center"; ctx.textBaseline = "middle";
         ctx.font = `${p.font_size}px '${fontKey}'`;
-
-        // [성씨 렌더링] 상하좌우 적용
         ctx.fillText(sur || "", x + p.sur_x, y + p.sur_y);
-
-        // [이름 렌더링] 상하좌우 적용
         if(given.length > 1) {
-            // 이름이 2글자일 때 개별 상하좌우
             ctx.fillText(given[0], x + p.given_multi_x, y - p.given_gap_y);
             ctx.fillText(given[1], x + p.given_multi_x, y + p.given_gap_y);
         } else {
-            // 이름이 1글자일 때 개별 상하좌우
             ctx.fillText(given || "", x + p.given_single_x, y + p.given_single_y);
         }
         ctx.restore();
@@ -240,6 +255,13 @@
 
     function fillRRect(x, y, w, h, r) {
         ctx.beginPath(); ctx.moveTo(x+r, y); ctx.lineTo(x+w-r, y); ctx.quadraticCurveTo(x+w, y, x+w, y+r); ctx.lineTo(x+w, y+h-r); ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h); ctx.lineTo(x+r, y+h); ctx.quadraticCurveTo(x, y+h, x, y+h-r); ctx.lineTo(x, y+r); ctx.quadraticCurveTo(x, y, x+r, y); ctx.closePath();
+    }
+
+    function downloadImage() {
+        const link = document.createElement('a');
+        link.download = `STAMP_DESIGN_${Date.now()}.jpg`;
+        link.href = canvas.toDataURL("image/jpeg", 0.9);
+        link.click();
     }
 
     window.onload = init;
