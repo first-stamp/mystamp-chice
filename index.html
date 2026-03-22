@@ -4,43 +4,32 @@
     <meta charset="UTF-8">
     <title>프리미엄 수제 도장 시뮬레이터 PRO</title>
     <style>
-        :root {
-            --point-pink: #e91e63;
-            --soft-bg: #fdfafb;
-            --rose-grad: linear-gradient(135deg, #ffafbd 0%, #ffc3a0 100%);
-        }
-        body { font-family: 'Apple SD Gothic Neo', sans-serif; text-align: center; background: var(--soft-bg); padding: 20px; margin: 0; color: #444; }
-        .box { background: white; padding: 30px; border-radius: 30px; display: inline-block; box-shadow: 0 20px 50px rgba(0,0,0,0.06); position: relative; max-width: 850px; }
-        
-        .store-link-banner { 
-            background: #fff5f7; padding: 15px; border-radius: 15px; margin-bottom: 25px; 
-            border: 1.5px solid #ffd1dc; cursor: pointer; transition: 0.3s ease;
-        }
-        .store-link-banner:hover { background: #ffeef2; transform: translateY(-3px); }
-        .store-link-banner b { color: var(--point-pink); font-size: 15px; }
+        /* [폰트 설정] 기존 규칙 유지 */
+        @font-face { font-family: 'B1'; src: url('body1.woff'); }
+        @font-face { font-family: 'B2'; src: url('body2.woff'); }
+        @font-face { font-family: 'B3'; src: url('body3.woff'); }
+        @font-face { font-family: 'B4'; src: url('body4.woff'); }
+        @font-face { font-family: 'B5'; src: url('body5.woff'); }
+        @font-face { font-family: 'P01'; src: url('p1.woff'); }
+        @font-face { font-family: 'P02'; src: url('p2.woff'); }
+        @font-face { font-family: 'P03'; src: url('p3.woff'); }
+        @font-face { font-family: 'P04'; src: url('p4.woff'); }
+        @font-face { font-family: 'P05'; src: url('p5.woff'); }
+        @font-face { font-family: 'P06'; src: url('p6.woff'); }
+        @font-face { font-family: 'P07'; src: url('p7.woff'); }
+        @font-face { font-family: 'P08'; src: url('p8.woff'); }
+        @font-face { font-family: 'P09'; src: url('p9.woff'); }
+        @font-face { font-family: 'P10'; src: url('p10.woff'); }
 
-        .controls { 
-            display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px; 
-            text-align: left; background: #fafafa; padding: 25px; border-radius: 20px; border: 1px solid #eee; 
-        }
+        :root { --point-pink: #e91e63; --soft-bg: #fdfafb; }
+        body { font-family: 'Apple SD Gothic Neo', sans-serif; text-align: center; background: var(--soft-bg); padding: 20px; margin: 0; color: #444; }
+        .box { background: white; padding: 30px; border-radius: 30px; display: inline-block; box-shadow: 0 20px 50px rgba(0,0,0,0.06); position: relative; max-width: 850px; text-align: left; }
+        .controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px; background: #fafafa; padding: 25px; border-radius: 20px; border: 1px solid #eee; }
         .control-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; align-items: end; }
         label { font-size: 11px; color: #999; margin-bottom: 6px; display: block; font-weight: bold; }
-        input, select { 
-            padding: 12px; border: 1.5px solid #eee; border-radius: 10px; width: 100%; 
-            box-sizing: border-box; font-size: 14px; outline: none; transition: 0.3s;
-        }
-        .font-box { background: #fffaf0; border: 1px solid #ffe0b2 !important; }
-
-        .apply-btn { background: #333; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; }
-        .download-btn { 
-            background: var(--rose-grad); color: white; border: none; padding: 20px; width: 100%;
-            border-radius: 15px; font-size: 17px; font-weight: bold; cursor: pointer; margin-top: 20px;
-            box-shadow: 0 10px 20px rgba(255,175,189,0.3); transition: 0.3s;
-        }
-
+        input, select { padding: 12px; border: 1.5px solid #eee; border-radius: 10px; width: 100%; box-sizing: border-box; font-size: 14px; outline: none; }
         .canvas-wrapper { position: relative; display: inline-block; line-height: 0; border: 10px solid #fff; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
         canvas { max-width: 100%; height: auto; border-radius: 10px; }
-
         #videoContainer { position: absolute; overflow: hidden; background: #000; z-index: 10; pointer-events: none; border: 4px solid #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
         .video-player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity 0.6s; }
     </style>
@@ -48,29 +37,24 @@
 <body>
 
 <div class="box">
-    <div class="store-link-banner" onclick="window.open('스마트스토어주소', '_blank')">
-        <b>🌸 우리 아이 첫 도장, 정성을 담은 커스텀 디자인 [스토어 구경하기] →</b>
-    </div>
-
     <div class="controls">
         <div class="control-row">
             <div>
-                <label>도장 인면 이름 (예: 강호석)</label>
+                <label>도장 인면 이름 (첫글자=성)</label>
                 <input type="text" id="printNameInput" value="강호석" oninput="draw()">
             </div>
             <div>
-                <label>도장 몸통 새김글 (영문/한글)</label>
+                <label>도장 몸통 새김글</label>
                 <input type="text" id="bodyTextInput" value="STAMP" oninput="draw()">
             </div>
             <div>
                 <label>💎 몸체 각인 폰트</label>
-                <select id="bodyFontSelect" class="font-box" onchange="draw()"></select>
+                <select id="bodyFontSelect" onchange="draw()"></select>
             </div>
         </div>
-
         <div class="control-row">
             <div>
-                <label>돌 종류 선택</label>
+                <label>돌 종류</label>
                 <select id="stoneSelect" onchange="changeStone()">
                     <option value="stone1">청전석</option>
                     <option value="stone2">요녕석</option>
@@ -79,19 +63,18 @@
                 </select>
             </div>
             <div>
-                <label>각인 위치</label>
+                <label>몸체 각인 위치</label>
                 <select id="posSelect" onchange="draw()">
                     <option value="P1">우측 하단 (전통)</option>
-                    <option value="P2">중앙 하단 (심플)</option>
-                    <option value="P3" selected>우측 상단 (영문/감성)</option>
+                    <option value="P2">중앙 하단 (심플-가로)</option>
+                    <option value="P3" selected>우측 상단 (감성)</option>
                 </select>
             </div>
             <div>
-                <label>🔴 인영(도장면) 폰트 (10종)</label>
-                <select id="printFontSelect" class="font-box" onchange="draw()"></select>
+                <label>🔴 인영 폰트</label>
+                <select id="printFontSelect" onchange="draw()"></select>
             </div>
         </div>
-        <button class="apply-btn" onclick="draw()">디자인 즉시 반영</button>
     </div>
 
     <div class="canvas-wrapper">
@@ -101,61 +84,53 @@
             <video id="v2" class="video-player" autoplay loop muted playsinline style="opacity: 0;"></video>
         </div>
     </div>
-
-    <button class="download-btn" onclick="downloadImage()">✨ 나만의 디자인 저장하기 (.png)</button>
 </div>
 
 <script>
-    /* 폰트 리스트 (파일명 유지) */
-    const BODY_FONTS = {
-        'B1': { file: 'body1.woff', name: '감성 명조' },
-        'B2': { file: 'body2.woff', name: '모던 고딕' },
-        'B3': { file: 'body3.woff', name: '정갈한 서체' },
-        'B4': { file: 'body4.woff', name: '우아한 필기체' },
-        'B5': { file: 'body5.woff', name: '클래식 정체' }
+    /**
+     * [CORE CONFIG - 인영 외부/내부 상하좌우 완전 제어]
+     */
+    const CONFIG = {
+        print: {
+            box_size: 160,       
+            radius: 20,         
+            border_width: 6,    
+            red_color: "#b03a2e", 
+            font_size: 60,      
+
+            // 1. 도장면 전체 위치 (캔버스 내 위치)
+            relief_x: 200,      // 양각 전체 가로
+            relief_y: 680,      // 양각 전체 세로
+            intaglio_x: 200,    // 음각 전체 가로
+            intaglio_y: 890,    // 음각 전체 세로
+            
+            // 2. 내부 글자 개별 미세조정 (도장 중앙 기준)
+            // 성씨(姓) 위치
+            sur_x: -35,         
+            sur_y: 0,           
+
+            // 이름(名) 위치 (이름이 1글자일 때)
+            given_single_x: 35,
+            given_single_y: 0,
+
+            // 이름(名) 위치 (이름이 2글자 이상일 때 - 위/아래 글자 간격)
+            given_multi_x: 35,
+            given_gap_y: 35     // 중앙 기준 위로 35, 아래로 35 배치
+        },
+
+        video: {
+            top: "35px", right: "35px", width: "230px", height: "160px", radius: "15px"
+        }
     };
 
-    const PRINT_FONTS = {
-        'P01': { file: 'p1.woff', name: '전서체(전통)' },
-        'P02': { file: 'p2.woff', name: '고인체(기본)' },
-        'P03': { file: 'p3.woff', name: '초서체(예술)' },
-        'P04': { file: 'p4.woff', name: '예서체(단정)' },
-        'P05': { file: 'p5.woff', name: '단정한 한글' },
-        'P06': { file: 'p6.woff', name: '귀여운 서체' },
-        'P07': { file: 'p7.woff', name: '굵은 도장체' },
-        'P08': { file: 'p8.woff', name: '세련된 서체' },
-        'P09': { file: 'p9.woff', name: '클래식 한자' },
-        'P10': { file: 'p10.woff', name: '모던 스탬프' }
-    };
+    const BODY_FONTS = { 'B1': '감성 명조', 'B2': '모던 고딕', 'B3': '정갈한 서체', 'B4': '우아한 필기체', 'B5': '클래식 정체' };
+    const PRINT_FONTS = { 'P01':'전서체','P02':'고인체','P03':'초서체','P04':'예서체','P05':'단정한 한글','P06':'귀여운 서체','P07':'굵은 도장체','P08':'세련된 서체','P09':'클래식 한자','P10':'모던 스탬프' };
 
-    /* =========================================
-       [디자인 정밀 조절]
-       ========================================= */
-    const PRINT_UI = {
-        box_size: 160, radius: 20, red_color: "#b03a2e",
-        relief: { x: 200, y: 680, font_size: 60, sur_x: -35, sur_y: 0, given_x: 35, given_y: 0, given_gap: 35 },
-        intaglio: { x: 200, y: 890, font_size: 60, sur_x: -35, sur_y: 0, given_x: 35, given_y: 0, given_gap: 35 }
-    };
-
-    const VIDEO_UI = { top: "35px", right: "35px", width: "230px", height: "160px", radius: "15px" };
-    
-    // [석재별 각인 좌표 설정 - 스톤4까지 완결]
     const STAMP_SETTINGS = {
-        "stone1_P1": { len2: { x: 435, y: 740, size: 65, space: 15 }, len3: { x: 435, y: 690, size: 60, space: 12 } },
-        "stone1_P2": { len2: { x: 384, y: 820, size: 65, space: 20 }, len3: { x: 384, y: 820, size: 50, space: 15 } },
-        "stone1_P3": { x: 445, y: 170, size: 30, space: 5 },
-
-        "stone2_P1": { len2: { x: 435, y: 740, size: 65, space: 15 }, len3: { x: 435, y: 690, size: 60, space: 12 } },
-        "stone2_P2": { len2: { x: 384, y: 820, size: 65, space: 20 }, len3: { x: 384, y: 820, size: 50, space: 15 } },
-        "stone2_P3": { x: 445, y: 170, size: 30, space: 5 },
-
-        "stone3_P1": { len2: { x: 435, y: 740, size: 65, space: 15 }, len3: { x: 435, y: 690, size: 60, space: 12 } },
-        "stone3_P2": { len2: { x: 384, y: 820, size: 65, space: 20 }, len3: { x: 384, y: 820, size: 50, space: 15 } },
-        "stone3_P3": { x: 445, y: 170, size: 30, space: 5 },
-
-        "stone4_P1": { len2: { x: 435, y: 740, size: 65, space: 15 }, len3: { x: 435, y: 690, size: 60, space: 12 } },
-        "stone4_P2": { len2: { x: 384, y: 820, size: 65, space: 20 }, len3: { x: 384, y: 820, size: 50, space: 15 } },
-        "stone4_P3": { x: 445, y: 170, size: 30, space: 5 }
+        "stone1_P1": { x: 435, y: 740, size: 65, space: 15 }, "stone1_P2": { x: 384, y: 820, size: 65, space: 15 }, "stone1_P3": { x: 445, y: 170, size: 30, space: 5 },
+        "stone2_P1": { x: 435, y: 740, size: 65, space: 15 }, "stone2_P2": { x: 384, y: 820, size: 65, space: 15 }, "stone2_P3": { x: 445, y: 170, size: 30, space: 5 },
+        "stone3_P1": { x: 435, y: 740, size: 65, space: 15 }, "stone3_P2": { x: 384, y: 820, size: 65, space: 15 }, "stone3_P3": { x: 445, y: 170, size: 30, space: 5 },
+        "stone4_P1": { x: 435, y: 740, size: 65, space: 15 }, "stone4_P2": { x: 384, y: 820, size: 65, space: 15 }, "stone4_P3": { x: 445, y: 170, size: 30, space: 5 }
     };
 
     const STONE_FILES = { "stone1": "stone1.jpg", "stone2": "stone2.jpg", "stone3": "stone3.jpg", "stone4": "stone4.jpg" };
@@ -168,10 +143,12 @@
 
     function init() {
         const vc = document.getElementById('videoContainer');
-        Object.assign(vc.style, { top: VIDEO_UI.top, right: VIDEO_UI.right, width: VIDEO_UI.width, height: VIDEO_UI.height, borderRadius: VIDEO_UI.radius });
+        Object.assign(vc.style, { 
+            top: CONFIG.video.top, right: CONFIG.video.right, width: CONFIG.video.width, height: CONFIG.video.height, borderRadius: CONFIG.video.radius 
+        });
         const bSel = document.getElementById('bodyFontSelect'), pSel = document.getElementById('printFontSelect');
-        Object.keys(BODY_FONTS).forEach(k => bSel.innerHTML += `<option value="${k}">${BODY_FONTS[k].name}</option>`);
-        Object.keys(PRINT_FONTS).forEach(k => pSel.innerHTML += `<option value="${k}">${PRINT_FONTS[k].name}</option>`);
+        Object.keys(BODY_FONTS).forEach(k => bSel.innerHTML += `<option value="${k}">${BODY_FONTS[k]}</option>`);
+        Object.keys(PRINT_FONTS).forEach(k => pSel.innerHTML += `<option value="${k}">${PRINT_FONTS[k]}</option>`);
         changeStone();
     }
 
@@ -182,8 +159,7 @@
         if (curV.getAttribute('src') !== vPath) {
             nxtV.src = vPath; nxtV.load();
             nxtV.oncanplaythrough = () => {
-                nxtV.style.opacity = 1; curV.style.opacity = 0;
-                nxtV.play().catch(e => console.log("자동재생 활성화"));
+                nxtV.style.opacity = 1; curV.style.opacity = 0; nxtV.play().catch(()=>{});
                 [curV, nxtV] = [nxtV, curV]; nxtV.oncanplaythrough = null;
             };
         }
@@ -194,80 +170,76 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         if (stoneImg.complete) ctx.drawImage(stoneImg, 0, 0, canvas.width, canvas.height);
 
-        const printFullName = document.getElementById('printNameInput').value; 
-        const bodyText = document.getElementById('bodyTextInput').value;       
-        const bFont = document.getElementById('bodyFontSelect').value;
-        const pFont = document.getElementById('printFontSelect').value;
+        const printFullName = document.getElementById('printNameInput').value;
+        const bodyText = document.getElementById('bodyTextInput').value;
+        const bFontKey = document.getElementById('bodyFontSelect').value;
+        const pFontKey = document.getElementById('printFontSelect').value;
         const stone = document.getElementById('stoneSelect').value;
         const pos = document.getElementById('posSelect').value;
 
-        // 1. 도장 몸통 각인
-        drawBodyStamp(bodyText, bFont, stone, pos);
-
-        // 2. 인영 렌더링 (첫글자는 성, 나머지는 이름으로 분리)
+        drawBodyStamp(bodyText, bFontKey, stone, pos);
+        
         const sur = printFullName.charAt(0);
         const given = printFullName.substring(1);
-        renderAdvancedPrint(PRINT_UI.relief, sur, given, pFont, false);
-        renderAdvancedPrint(PRINT_UI.intaglio, sur, given, pFont, true);
+
+        renderAdvancedPrint(CONFIG.print.relief_x, CONFIG.print.relief_y, sur, given, pFontKey, false);
+        renderAdvancedPrint(CONFIG.print.intaglio_x, CONFIG.print.intaglio_y, sur, given, pFontKey, true);
     }
 
     function drawBodyStamp(text, fontKey, stoneKey, posKey) {
-        let cfg = STAMP_SETTINGS[`${stoneKey}_${posKey}`];
+        const cfg = STAMP_SETTINGS[`${stoneKey}_${posKey}`];
         ctx.save();
         ctx.fillStyle = "rgba(255, 255, 255, 0.85)"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.font = `600 ${cfg.size}px '${fontKey}', sans-serif`;
         
         if (posKey === 'P3') {
-            ctx.font = `600 ${cfg.size}px ${fontKey}, sans-serif`;
             let y = cfg.y;
             text.split('').forEach(char => {
                 ctx.save(); ctx.translate(cfg.x, y); ctx.rotate(Math.PI / 2);
-                ctx.fillText(char, 0, 0); ctx.restore();
-                y += cfg.size + cfg.space;
+                ctx.fillText(char, 0, 0); ctx.restore(); y += cfg.size + cfg.space;
             });
+        } else if (posKey === 'P2') {
+            let totalW = (text.length * cfg.size) + ((text.length - 1) * cfg.space);
+            let startX = cfg.x - (totalW / 2) + (cfg.size / 2);
+            text.split('').forEach((char, i) => { ctx.fillText(char, startX + (i * (cfg.size + cfg.space)), cfg.y); });
         } else {
-            const activeCfg = text.length <= 2 ? cfg.len2 : cfg.len3;
-            ctx.font = `600 ${activeCfg.size}px ${fontKey}, sans-serif`;
-            let y = activeCfg.y;
-            text.split('').forEach(char => { ctx.fillText(char, activeCfg.x, y); y += activeCfg.size + activeCfg.space; });
+            let y = cfg.y;
+            text.split('').forEach(char => { ctx.fillText(char, cfg.x, y); y += cfg.size + cfg.space; });
         }
         ctx.restore();
     }
 
-    function renderAdvancedPrint(config, sur, given, fontKey, isNeg) {
-        const ui = PRINT_UI;
-        const drawX = config.x - (ui.box_size / 2);
-        const drawY = config.y - (ui.box_size / 2);
+    function renderAdvancedPrint(x, y, sur, given, fontKey, isNeg) {
+        const p = CONFIG.print;
+        const drawX = x - (p.box_size / 2), drawY = y - (p.box_size / 2);
         ctx.save();
         if (isNeg) {
-            ctx.fillStyle = ui.red_color; fillRRect(drawX, drawY, ui.box_size, ui.box_size, ui.radius); ctx.fill();
+            ctx.fillStyle = p.red_color; fillRRect(drawX, drawY, p.box_size, p.box_size, p.radius); ctx.fill();
             ctx.fillStyle = "#fff";
         } else {
-            ctx.strokeStyle = ui.red_color; ctx.lineWidth = 6; fillRRect(drawX, drawY, ui.box_size, ui.box_size, ui.radius); ctx.stroke();
-            ctx.fillStyle = ui.red_color;
+            ctx.strokeStyle = p.red_color; ctx.lineWidth = p.border_width; fillRRect(drawX, drawY, p.box_size, p.box_size, p.radius); ctx.stroke();
+            ctx.fillStyle = p.red_color;
         }
         ctx.textAlign = "center"; ctx.textBaseline = "middle";
-        ctx.font = `${config.font_size}px ${fontKey}`;
+        ctx.font = `${p.font_size}px '${fontKey}'`;
 
-        // 성 - 왼쪽 배치
-        ctx.fillText(sur || "", config.x + config.sur_x, config.y + config.sur_y);
+        // [성씨 렌더링] 상하좌우 적용
+        ctx.fillText(sur || "", x + p.sur_x, y + p.sur_y);
 
-        // 이름 - 오른쪽 세로 배치
+        // [이름 렌더링] 상하좌우 적용
         if(given.length > 1) {
-            ctx.fillText(given[0], config.x + config.given_x, config.y + config.given_y - config.given_gap);
-            ctx.fillText(given[1], config.x + config.given_x, config.y + config.given_y + config.given_gap);
+            // 이름이 2글자일 때 개별 상하좌우
+            ctx.fillText(given[0], x + p.given_multi_x, y - p.given_gap_y);
+            ctx.fillText(given[1], x + p.given_multi_x, y + p.given_gap_y);
         } else {
-            ctx.fillText(given || "", config.x + config.given_x, config.y + config.given_y);
+            // 이름이 1글자일 때 개별 상하좌우
+            ctx.fillText(given || "", x + p.given_single_x, y + p.given_single_y);
         }
         ctx.restore();
     }
 
     function fillRRect(x, y, w, h, r) {
         ctx.beginPath(); ctx.moveTo(x+r, y); ctx.lineTo(x+w-r, y); ctx.quadraticCurveTo(x+w, y, x+w, y+r); ctx.lineTo(x+w, y+h-r); ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h); ctx.lineTo(x+r, y+h); ctx.quadraticCurveTo(x, y+h, x, y+h-r); ctx.lineTo(x, y+r); ctx.quadraticCurveTo(x, y, x+r, y); ctx.closePath();
-    }
-
-    function downloadImage() {
-        const link = document.createElement('a'); link.download = 'premium-stamp-design.png';
-        link.href = canvas.toDataURL(); link.click();
     }
 
     window.onload = init;
