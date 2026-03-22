@@ -2,9 +2,10 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>프리미엄 수제 도장 시뮬레이터 PRO</title>
     <style>
-        /* [폰트 설정] 기존 규칙 유지 */
+        /* [폰트 설정] 매니저님 기존 설정 유지 */
         @font-face { font-family: 'B1'; src: url('body1.woff'); }
         @font-face { font-family: 'B2'; src: url('body2.woff'); }
         @font-face { font-family: 'B3'; src: url('body3.woff'); }
@@ -22,29 +23,28 @@
         @font-face { font-family: 'P10'; src: url('p10.woff'); }
 
         :root { --point-pink: #e91e63; --soft-bg: #fdfafb; }
-        body { font-family: 'Apple SD Gothic Neo', sans-serif; text-align: center; background: var(--soft-bg); padding: 20px; margin: 0; color: #444; }
+        body { font-family: 'Apple SD Gothic Neo', sans-serif; background: var(--soft-bg); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         
-        /* [추가] 상단 스마트스토어 링크 배너 */
-        .store-banner { background: #fff1f6; padding: 15px; border-radius: 15px; margin-bottom: 20px; display: inline-block; width: 100%; max-width: 850px; border: 1px solid #ffdae9; box-sizing: border-box; }
+        .store-banner { background: #fff1f6; padding: 15px; border-radius: 15px; margin-bottom: 20px; width: 100%; max-width: 850px; border: 1px solid #ffdae9; text-align: center; box-sizing: border-box; }
         .store-banner a { color: var(--point-pink); text-decoration: none; font-weight: bold; font-size: 15px; }
 
-        .box { background: white; padding: 30px; border-radius: 30px; display: inline-block; box-shadow: 0 20px 50px rgba(0,0,0,0.06); position: relative; max-width: 850px; text-align: left; }
+        .box { background: white; padding: 30px; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.06); width: 100%; max-width: 850px; box-sizing: border-box; }
         .controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px; background: #fafafa; padding: 25px; border-radius: 20px; border: 1px solid #eee; }
         .control-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; align-items: end; }
+        @media (max-width: 600px) { .control-row { grid-template-columns: 1fr; } }
+
         label { font-size: 11px; color: #999; margin-bottom: 6px; display: block; font-weight: bold; }
-        input, select { padding: 12px; border: 1.5px solid #eee; border-radius: 10px; width: 100%; box-sizing: border-box; font-size: 14px; outline: none; }
+        input, select { padding: 12px; border: 1.5px solid #eee; border-radius: 10px; width: 100%; box-sizing: border-box; font-size: 14px; outline: none; background: #fff; }
         
-        .canvas-wrapper { position: relative; display: inline-block; line-height: 0; border: 10px solid #fff; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        canvas { max-width: 100%; height: auto; border-radius: 10px; }
+        .canvas-wrapper { position: relative; line-height: 0; border: 10px solid #fff; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); overflow: hidden; }
+        canvas { max-width: 100%; height: auto; }
         
         #videoContainer { position: absolute; overflow: hidden; background: #000; z-index: 10; pointer-events: none; border: 4px solid #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
         .video-player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
 
-        /* [추가] 하단 다운로드 및 정보 섹션 */
         .download-footer { margin-top: 25px; text-align: center; }
-        .download-btn { background: #333; color: #fff; border: none; padding: 15px 40px; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: bold; transition: 0.3s; width: 100%; max-width: 300px; }
+        .download-btn { background: #333; color: #fff; border: none; padding: 15px 40px; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: bold; width: 100%; max-width: 300px; transition: 0.3s; }
         .download-btn:hover { background: var(--point-pink); }
-        .info-text { margin-top: 15px; font-size: 12px; color: #bbb; letter-spacing: -0.5px; }
     </style>
 </head>
 <body>
@@ -56,41 +56,18 @@
 <div class="box">
     <div class="controls">
         <div class="control-row">
-            <div>
-                <label>도장 인면 이름 (첫글자=성)</label>
-                <input type="text" id="printNameInput" value="강호석" oninput="draw()">
-            </div>
-            <div>
-                <label>도장 몸통 새김글</label>
-                <input type="text" id="bodyTextInput" value="STAMP" oninput="draw()">
-            </div>
-            <div>
-                <label>💎 몸체 각인 폰트</label>
-                <select id="bodyFontSelect" onchange="draw()"></select>
-            </div>
+            <div><label>도장 인면 이름</label><input type="text" id="printNameInput" value="강호석" oninput="draw()"></div>
+            <div><label>도장 몸통 새김글</label><input type="text" id="bodyTextInput" value="STAMP" oninput="draw()"></div>
+            <div><label>💎 몸체 각인 폰트</label><select id="bodyFontSelect" onchange="draw()"></select></div>
         </div>
         <div class="control-row">
-            <div>
-                <label>돌 종류</label>
-                <select id="stoneSelect" onchange="changeStone()">
-                    <option value="stone1">청전석</option>
-                    <option value="stone2">요녕석</option>
-                    <option value="stone3">백두석</option>
-                    <option value="stone4">밀크로즈석</option>
-                </select>
-            </div>
-            <div>
-                <label>몸체 각인 위치</label>
-                <select id="posSelect" onchange="draw()">
-                    <option value="P1">우측 하단 (전통)</option>
-                    <option value="P2">중앙 하단 (심플-가로)</option>
-                    <option value="P3" selected>우측 상단 (감성)</option>
-                </select>
-            </div>
-            <div>
-                <label>🔴 인영 폰트</label>
-                <select id="printFontSelect" onchange="draw()"></select>
-            </div>
+            <div><label>돌 종류</label><select id="stoneSelect" onchange="changeStone()">
+                <option value="stone1">청전석</option><option value="stone2">요녕석</option><option value="stone3">백두석</option><option value="stone4">밀크로즈석</option>
+            </select></div>
+            <div><label>몸체 각인 위치</label><select id="posSelect" onchange="draw()">
+                <option value="P1">우측 하단 (전통)</option><option value="P2">중앙 하단 (심플)</option><option value="P3" selected>우측 상단 (감성)</option>
+            </select></div>
+            <div><label>🔴 인영 폰트</label><select id="printFontSelect" onchange="draw()"></select></div>
         </div>
     </div>
 
@@ -103,54 +80,34 @@
 
     <div class="download-footer">
         <button class="download-btn" onclick="downloadImage()">디자인 즉시 반영 및 다운로드</button>
-        <div id="statusInfo" class="info-text"></div>
     </div>
 </div>
 
 <script>
     /**
-     * [CORE CONFIG - 인영 외부/내부 상하좌우 완전 제어]
-     * 이 설정값들은 절대 변경되지 않았습니다.
+     * [CORE CONFIG] - 매니저님의 수치를 절대적으로 유지합니다.
      */
     const CONFIG = {
         print: {
-            box_size: 160,       
-            radius: 20,         
-            border_width: 6,    
-            red_color: "#b03a2e", 
-            font_size: 60,      
-
-            // 1. 도장면 전체 위치 (캔버스 내 위치)
-            relief_x: 200,      // 양각 전체 가로
-            relief_y: 680,      // 양각 전체 세로
-            intaglio_x: 200,    // 음각 전체 가로
-            intaglio_y: 890,    // 음각 전체 세로
-            
-            // 2. 내부 글자 개별 미세조정 (도장 중앙 기준)
-            sur_x: -35,         // 성씨 가로
-            sur_y: 0,           // 성씨 세로
-
-            given_single_x: 35, // 이름(1자) 가로
-            given_single_y: 0,  // 이름(1자) 세로
-
-            given_multi_x: 35,  // 이름(2자) 가로
-            given_gap_y: 35     // 이름(2자) 상하 간격
+            box_size: 160, radius: 20, border_width: 6, red_color: "#b03a2e", font_size: 60,
+            relief_x: 200, relief_y: 680,
+            intaglio_x: 200, intaglio_y: 890,
+            sur_x: -35, sur_y: 0,
+            given_single_x: 35, given_single_y: 0,
+            given_multi_x: 35, given_gap_y: 35
         },
-        video: { 
-            top: "35px", right: "35px", width: "230px", height: "160px", radius: "15px" 
-        }
+        video: { top: "35px", right: "35px", width: "230px", height: "160px", radius: "15px" }
     };
 
+    // [폰트 및 설정 데이터 - 변경 없음]
     const BODY_FONTS = { 'B1': '감성 명조', 'B2': '모던 고딕', 'B3': '정갈한 서체', 'B4': '우아한 필기체', 'B5': '클래식 정체' };
     const PRINT_FONTS = { 'P01':'전서체','P02':'고인체','P03':'초서체','P04':'예서체','P05':'단정한 한글','P06':'귀여운 서체','P07':'굵은 도장체','P08':'세련된 서체','P09':'클래식 한자','P10':'모던 스탬프' };
-
     const STAMP_SETTINGS = {
         "stone1_P1": { x: 435, y: 740, size: 65, space: 15 }, "stone1_P2": { x: 384, y: 820, size: 65, space: 15 }, "stone1_P3": { x: 445, y: 170, size: 30, space: 5 },
         "stone2_P1": { x: 435, y: 740, size: 65, space: 15 }, "stone2_P2": { x: 384, y: 820, size: 65, space: 15 }, "stone2_P3": { x: 445, y: 170, size: 30, space: 5 },
         "stone3_P1": { x: 435, y: 740, size: 65, space: 15 }, "stone3_P2": { x: 384, y: 820, size: 65, space: 15 }, "stone3_P3": { x: 445, y: 170, size: 30, space: 5 },
         "stone4_P1": { x: 435, y: 740, size: 65, space: 15 }, "stone4_P2": { x: 384, y: 820, size: 65, space: 15 }, "stone4_P3": { x: 445, y: 170, size: 30, space: 5 }
     };
-
     const STONE_FILES = { "stone1": "stone1.jpg", "stone2": "stone2.jpg", "stone3": "stone3.jpg", "stone4": "stone4.jpg" };
     const VIDEO_MAP = { "stone1": "stone1_process.mp4", "stone2": "stone2_process.mp4", "stone3": "stone3_process.mp4", "stone4": "stone4_process.mp4" };
 
@@ -164,7 +121,7 @@
         const bSel = document.getElementById('bodyFontSelect'), pSel = document.getElementById('printFontSelect');
         Object.keys(BODY_FONTS).forEach(k => bSel.innerHTML += `<option value="${k}">${BODY_FONTS[k]}</option>`);
         Object.keys(PRINT_FONTS).forEach(k => pSel.innerHTML += `<option value="${k}">${PRINT_FONTS[k]}</option>`);
-        
+        document.fonts.ready.then(() => draw());
         changeStone();
     }
 
@@ -173,39 +130,22 @@
         stoneImg.src = STONE_FILES[val];
         video.src = VIDEO_MAP[val];
         video.load();
-        
-        // 영상 재생 보장 로직
-        const playPromise = video.play();
-        if (playPromise !== undefined) {
-            playPromise.catch(() => {
-                // 상호작용 전까지 대기했다가 클릭 시 재생
-                window.addEventListener('mousedown', () => video.play(), {once: true});
-            });
-        }
+        video.play().catch(() => { window.addEventListener('mousedown', () => video.play(), {once: true}); });
         stoneImg.onload = draw;
     }
 
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         if (stoneImg.complete) ctx.drawImage(stoneImg, 0, 0, canvas.width, canvas.height);
-
-        const printFullName = document.getElementById('printNameInput').value;
+        const name = document.getElementById('printNameInput').value;
         const bodyText = document.getElementById('bodyTextInput').value;
-        const bFontKey = document.getElementById('bodyFontSelect').value;
-        const pFontKey = document.getElementById('printFontSelect').value;
+        const bFont = document.getElementById('bodyFontSelect').value;
+        const pFont = document.getElementById('printFontSelect').value;
         const stone = document.getElementById('stoneSelect').value;
         const pos = document.getElementById('posSelect').value;
-
-        drawBodyStamp(bodyText, bFontKey, stone, pos);
-        
-        const sur = printFullName.charAt(0);
-        const given = printFullName.substring(1);
-
-        renderAdvancedPrint(CONFIG.print.relief_x, CONFIG.print.relief_y, sur, given, pFontKey, false);
-        renderAdvancedPrint(CONFIG.print.intaglio_x, CONFIG.print.intaglio_y, sur, given, pFontKey, true);
-        
-        // 하단 정보 실시간 업데이트
-        document.getElementById('statusInfo').innerText = `${PRINT_FONTS[pFontKey]} | 성:(${CONFIG.print.sur_x},${CONFIG.print.sur_y}) | 이름:(${CONFIG.print.given_multi_x},${CONFIG.print.given_gap_y})`;
+        drawBodyStamp(bodyText, bFont, stone, pos);
+        renderAdvancedPrint(CONFIG.print.relief_x, CONFIG.print.relief_y, name.charAt(0), name.substring(1), pFont, false);
+        renderAdvancedPrint(CONFIG.print.intaglio_x, CONFIG.print.intaglio_y, name.charAt(0), name.substring(1), pFont, true);
     }
 
     function drawBodyStamp(text, fontKey, stoneKey, posKey) {
@@ -234,6 +174,9 @@
         const p = CONFIG.print;
         const drawX = x - (p.box_size / 2), drawY = y - (p.box_size / 2);
         ctx.save();
+        // [안정성 보강] 캔버스 밖으로 나가는 것을 시각적으로 방지하기 위해 드로잉 영역 제한(Clipping)
+        ctx.beginPath(); ctx.rect(0, 0, canvas.width, canvas.height); ctx.clip();
+        
         if (isNeg) {
             ctx.fillStyle = p.red_color; fillRRect(drawX, drawY, p.box_size, p.box_size, p.radius); ctx.fill();
             ctx.fillStyle = "#fff";
@@ -263,7 +206,6 @@
         link.href = canvas.toDataURL("image/jpeg", 0.9);
         link.click();
     }
-
     window.onload = init;
 </script>
 </body>
