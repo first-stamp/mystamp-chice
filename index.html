@@ -2,17 +2,36 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>프리미엄 수제 도장 시뮬레이터 PRO - 좌표 완벽 복원판</title>
+    <title>프리미엄 수제 도장 시뮬레이터 PRO - 폰트 완벽 적용판</title>
     <style>
         :root {
             --point-pink: #e91e63;
             --soft-bg: #fdfafb;
             --rose-grad: linear-gradient(135deg, #ffafbd 0%, #ffc3a0 100%);
         }
+
+        /* [중요] 폰트 파일 연결 - 이 부분이 있어야 폰트가 적용됩니다 */
+        /* 몸체 폰트 5종 */
+        @font-face { font-family: 'B1'; src: url('body1.woff'); }
+        @font-face { font-family: 'B2'; src: url('body2.woff'); }
+        @font-face { font-family: 'B3'; src: url('body3.woff'); }
+        @font-face { font-family: 'B4'; src: url('body4.woff'); }
+        @font-face { font-family: 'B5'; src: url('body5.woff'); }
+        /* 인영 폰트 10종 */
+        @font-face { font-family: 'P01'; src: url('p1.woff'); }
+        @font-face { font-family: 'P02'; src: url('p2.woff'); }
+        @font-face { font-family: 'P03'; src: url('p3.woff'); }
+        @font-face { font-family: 'P04'; src: url('p4.woff'); }
+        @font-face { font-family: 'P05'; src: url('p5.woff'); }
+        @font-face { font-family: 'P06'; src: url('p6.woff'); }
+        @font-face { font-family: 'P07'; src: url('p7.woff'); }
+        @font-face { font-family: 'P08'; src: url('p8.woff'); }
+        @font-face { font-family: 'P09'; src: url('p9.woff'); }
+        @font-face { font-family: 'P10'; src: url('p10.woff'); }
+
         body { font-family: 'Apple SD Gothic Neo', sans-serif; text-align: center; background: var(--soft-bg); padding: 20px; margin: 0; color: #444; }
         .box { background: white; padding: 30px; border-radius: 30px; display: inline-block; box-shadow: 0 20px 50px rgba(0,0,0,0.06); position: relative; max-width: 900px; }
         
-        /* 상단 스마트스토어 배너 */
         .store-link-banner { 
             background: #fff5f7; padding: 15px; border-radius: 15px; margin-bottom: 25px; 
             border: 1.5px solid #ffd1dc; cursor: pointer; transition: 0.3s ease;
@@ -20,7 +39,6 @@
         .store-link-banner:hover { background: #ffeef2; transform: translateY(-3px); }
         .store-link-banner b { color: var(--point-pink); font-size: 15px; }
 
-        /* 설정창 레이아웃 */
         .controls { 
             display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px; 
             text-align: left; background: #fafafa; padding: 25px; border-radius: 20px; border: 1px solid #eee; 
@@ -34,7 +52,6 @@
         input:focus, select:focus { border-color: var(--point-pink); background: #fff; }
         .font-box { background: #fffaf0; border: 1px solid #ffe0b2 !important; }
 
-        /* 캔버스 뷰 */
         .canvas-wrapper { position: relative; display: inline-block; line-height: 0; border: 10px solid #fff; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
         canvas { max-width: 100%; height: auto; border-radius: 10px; }
 
@@ -108,29 +125,31 @@
 
 <script>
     /* ============================================================
-       [1. 매니저 설정 구역] - 도장 인영 레이아웃 수정 완료
+       [1. 매니저 설정 구역] - 디자인 수치를 여기서 조절하세요!
        ============================================================ */
 
+    // 인영(도장 찍히는 면) 레이아웃 설정
     const PRINT_UI = {
-        target_x: 180,      
-        y_relief: 550,      
-        y_intaglio: 770,    
-        box_size: 160,      
-        radius: 25,         
+        target_x: 180,      // 도장의 좌우 위치
+        y_relief: 550,      // 양각 도장 높이
+        y_intaglio: 770,    // 음각 도장 높이
+        box_size: 160,      // 도장 테두리 크기
+        radius: 25,         // 테두리 둥근 정도
         red_color: "#b03a2e",
         
-        // 수정된 부분: 성은 왼쪽(-), 이름은 오른쪽(+) 배치
-        sur: { x_off: -38, size: 70 },    // 성의 좌우위치, 크기
+        // 성(왼쪽)과 이름(오른쪽 위아래) 배치 상세
+        sur: { x_off: -38, size: 70 },    
         given: { 
-            x_off: 38,                    // 이름의 좌우위치
-            y_top_off: -38,               // 첫 번째 이름 글자 높이
-            y_bottom_off: 38,             // 두 번째 이름 글자 높이
+            x_off: 38,                    
+            y_top_off: -38,               
+            y_bottom_off: 38,             
             size: 60 
         } 
     };
 
     const VIDEO_UI = { top: "35px", right: "35px", width: "230px", height: "160px", radius: "15px" };
 
+    // 돌 몸체 각인 좌표 시스템 (제공해주신 데이터 그대로 유지)
     const STAMP_SETTINGS = {
         "stone1_P1": { len2: { x: 435, y: 740, size: 65, space: 15 }, len3: { x: 435, y: 690, size: 60, space: 12 } },
         "stone1_P2": { len2: { x: 384, y: 820, size: 65, space: 20 }, len3: { x: 384, y: 820, size: 50, space: 15 } },
@@ -147,24 +166,19 @@
     };
 
     /* ============================================================
-       [2. 데이터 및 엔진 구동] - 로직 유지
+       [2. 데이터 및 구동 로직] - 폰트 적용 엔진 수정
        ============================================================ */
 
     const BODY_FONTS = {
-        'B1': { file: 'body1.woff', name: '감성 명조' },
-        'B2': { file: 'body2.woff', name: '모던 고딕' },
-        'B3': { file: 'body3.woff', name: '정갈한 서체' },
-        'B4': { file: 'body4.woff', name: '우아한 필기체' },
-        'B5': { file: 'body5.woff', name: '클래식 정체' }
+        'B1': 'B1', 'B2': 'B2', 'B3': 'B3', 'B4': 'B4', 'B5': 'B5'
     };
+    const BODY_NAMES = ['감성 명조', '모던 고딕', '정갈한 서체', '우아한 필기체', '클래식 정체'];
 
     const PRINT_FONTS = {
-        'P01': { file: 'p1.woff', name: '전서체(전통)' }, 'P02': { file: 'p2.woff', name: '고인체(기본)' },
-        'P03': { file: 'p3.woff', name: '초서체(예술)' }, 'P04': { file: 'p4.woff', name: '예서체(단정)' },
-        'P05': { file: 'p5.woff', name: '단정한 한글' }, 'P06': { file: 'p6.woff', name: '귀여운 서체' },
-        'P07': { file: 'p7.woff', name: '굵은 도장체' }, 'P08': { file: 'p8.woff', name: '세련된 서체' },
-        'P09': { file: 'p9.woff', name: '클래식 한자' }, 'P10': { file: 'p10.woff', name: '모던 스탬프' }
+        'P01': 'P01', 'P02': 'P02', 'P03': 'P03', 'P04': 'P04', 'P05': 'P05',
+        'P06': 'P06', 'P07': 'P07', 'P08': 'P08', 'P09': 'P09', 'P10': 'P10'
     };
+    const PRINT_NAMES = ['전서체(전통)', '고인체(기본)', '초서체(예술)', '예서체(단정)', '단정한 한글', '귀여운 서체', '굵은 도장체', '세련된 서체', '클래식 한자', '모던 스탬프'];
 
     const STONE_FILES = { "stone1": "stone1.jpg", "stone2": "stone2.jpg", "stone3": "stone3.jpg", "stone4": "stone4.jpg" };
     const VIDEO_MAP = { "stone1": "stone1_process.mp4", "stone2": "stone2_process.mp4", "stone3": "stone3_process.mp4", "stone4": "stone4_process.mp4" };
@@ -178,10 +192,13 @@
         Object.assign(vc.style, { top: VIDEO_UI.top, right: VIDEO_UI.right, width: VIDEO_UI.width, height: VIDEO_UI.height, borderRadius: VIDEO_UI.radius });
         
         const bSel = document.getElementById('bodyFontSelect'), pSel = document.getElementById('printFontSelect');
-        Object.keys(BODY_FONTS).forEach(k => bSel.innerHTML += `<option value="${k}">${BODY_FONTS[k].name}</option>`);
-        Object.keys(PRINT_FONTS).forEach(k => pSel.innerHTML += `<option value="${k}">${PRINT_FONTS[k].name}</option>`);
+        Object.keys(BODY_FONTS).forEach((k, idx) => bSel.innerHTML += `<option value="${k}">${BODY_NAMES[idx]}</option>`);
+        Object.keys(PRINT_FONTS).forEach((k, idx) => pSel.innerHTML += `<option value="${k}">${PRINT_NAMES[idx]}</option>`);
         
-        changeStone();
+        // 폰트가 로드된 후 그리기 위해 약간의 지연 후 실행
+        document.fonts.ready.then(() => {
+            changeStone();
+        });
     }
 
     function changeStone() {
@@ -225,7 +242,7 @@
 
         if (posKey === 'P2') {
             let cfg = (text.length <= 2) ? raw.len2 : raw.len3;
-            ctx.font = `600 ${cfg.size}px ${fontKey}, sans-serif`;
+            ctx.font = `600 ${cfg.size}px ${fontKey}`; // 폰트 적용
             let startX = cfg.x - (((text.length - 1) * (cfg.size + cfg.space)) / 2);
             text.split('').forEach(char => {
                 ctx.fillText(char, startX, cfg.y);
@@ -233,7 +250,7 @@
             });
         } 
         else if (posKey === 'P3') {
-            ctx.font = `600 ${raw.size}px ${fontKey}, sans-serif`;
+            ctx.font = `600 ${raw.size}px ${fontKey}`; // 폰트 적용
             let curY = raw.y;
             text.split('').forEach(char => {
                 ctx.save();
@@ -246,7 +263,7 @@
         }
         else {
             let cfg = (text.length <= 2) ? raw.len2 : raw.len3;
-            ctx.font = `600 ${cfg.size}px ${fontKey}, sans-serif`;
+            ctx.font = `600 ${cfg.size}px ${fontKey}`; // 폰트 적용
             let curY = cfg.y;
             text.split('').forEach(char => {
                 ctx.fillText(char, cfg.x, curY);
@@ -256,7 +273,6 @@
         ctx.restore();
     }
 
-    // 수정된 핵심 인영 렌더링 함수
     function renderPrintBox(x, y, sur, given, fontKey, isNeg) {
         const ui = PRINT_UI;
         ctx.save();
@@ -271,19 +287,16 @@
         const centerX = x + ui.box_size/2;
         const centerY = y + ui.box_size/2;
 
-        // 1. 성 (왼쪽 배치)
+        // 1. 성 (왼쪽 배치) - 폰트 적용
         ctx.font = `${ui.sur.size}px ${fontKey}`;
         ctx.fillText(sur, centerX + ui.sur.x_off, centerY);
 
-        // 2. 이름 (오른쪽 위/아래 배치)
+        // 2. 이름 (오른쪽 위/아래 배치) - 폰트 적용
         ctx.font = `${ui.given.size}px ${fontKey}`;
         if(given.length >= 2) {
-            // 이름 첫 번째 글자 (오른쪽 위)
             ctx.fillText(given[0], centerX + ui.given.x_off, centerY + ui.given.y_top_off);
-            // 이름 두 번째 글자 (오른쪽 아래)
             ctx.fillText(given[1], centerX + ui.given.x_off, centerY + ui.given.y_bottom_off);
         } else {
-            // 이름이 한 글자일 때 (오른쪽 중앙)
             ctx.fillText(given, centerX + ui.given.x_off, centerY);
         }
         ctx.restore();
